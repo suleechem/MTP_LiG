@@ -294,6 +294,7 @@ def Step_D():
                 first_check = False
                 continue
 
+
             # POSCAR 6번째 줄 원소 정보 추출
             n_ele     = os.popen('sed -n 6p %s/POSCAR' % d).read().split()
             n_ele_pos = os.popen('sed -n 6p %s' % pos_name).read().split()
