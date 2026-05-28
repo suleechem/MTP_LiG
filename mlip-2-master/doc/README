@@ -1,7 +1,0 @@
-manual/ - folder with the user manual
-
-The examples/ folder contains the examples from "The MLIP package..." manuscript
-Downloading and unpacking may be required.
-
-The basic usage examples can be found in test/examples/
-
