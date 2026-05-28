@@ -1,0 +1,86 @@
+
+============================================================
+= PARALLEL VERSION (v6-parallel): --n-workers N 으로 SOC 병렬 처리
+============================================================
+
+= Parallel Ewald Training Dataset Generation (권장) =
+= 2×2×4: 17 SOC 레벨 → --n-workers 8 로 병렬 처리 =
+python enumerate_li_configs_Final_optimized_motif_v6_mtp_train_parallel.py --structure LiC6.cif \
+   --ga-min-li-li-same-layer 4.00 \
+   --ga-pop 100 \
+   --ga-gens 50 \
+   --ga-expand-li-sites \
+   --stacking-sequences ALL \
+   --soc-stacking-policy conservative \
+   --supercell 2 2 4 \
+   --write-training-cfg \
+   --training-data-soc-threshold 1.01 \
+   --training-data-top-n 30 \
+   --structured-variants \
+   --energy-backend ewald \
+   --n-workers 8 \
+   > LOG_parallel 2>&1 &
+
+= Parallel MTP Training Dataset Generation =
+= --n-workers × --mtp-workers ≤ 총 코어 수 권장 =
+python enumerate_li_configs_Final_optimized_motif_v6_mtp_train_parallel.py --structure LiC6.cif \
+   --mlip-ini mlip.ini \
+   --ga-min-li-li-same-layer 4.00 \
+   --ga-pop 150 \
+   --ga-gens 80 \
+   --ga-expand-li-sites \
+   --stacking-sequences ALL \
+   --soc-stacking-policy conservative \
+   --supercell 2 2 4 \
+   --write-training-cfg \
+   --training-data-soc-threshold 1.01 \
+   --training-data-top-n 30 \
+   --structured-variants \
+   --n-workers 4 \
+   --mtp-workers 2 \
+   --no-mtp-write-aggregate \
+   > LOG_mtp_parallel 2>&1 &
+
+============================================================
+= SEQUENTIAL VERSION (v6_mtp_train): 기존 단일 프로세스
+============================================================
+
+= Ewald Training Dataset Generation =
+= 기존 CASM 232 *2 에 추가하는 training dataset : ga-expand-li-sites 사용 =
+python enumerate_li_configs_Final_optimized_motif_v6_mtp_train.py  --structure LiC6.cif \
+   --ga-min-li-li-same-layer 4.00 \
+   --ga-pop 100 \
+   --ga-gens 50 \
+   --ga-expand-li-sites \
+   --stacking-sequences ALL \
+   --soc-stacking-policy conservative \
+   --supercell 2 2 4 \
+   --write-training-cfg \
+   --training-data-soc-threshold 1.01 \
+   --training-data-top-n 30 \
+   --structured-variants \
+   --energy-backend ewald
+
+= Ewald version =
+python enumerate_li_configs_Final_optimized_motif_v6_mtp_train.py  --structure LiC6.cif \
+   --structure LiC6.cif  --stacking-sequences ALL  --ga --ga-min-li-li-same-layer 4.00 --supercell 2 2 4 --ga-motif-seeding high-soc
+
+= MTP version =
+python enumerate_li_configs_Final_optimized_motif_v6_mtp_train.py  --structure LiC6.cif \
+   --mlip-ini mlip.ini \
+   --ga \
+   --ga-min-li-li-same-layer 4.00 \
+   --ga-pop 150 \
+   --ga-gens 100 \
+   --ga-expand-li-sites on \
+   --ga-threshold-ev 0.5 \
+   --ga-motif-seeding high-soc \
+   --motif-seed-soc-threshold 0.5 \
+   --energy-backend mtp-relax \
+   --mtp-workers 4 \
+   --mtp-batch-size 30 \
+   --output ./results_mtp_parallel \
+   --stacking-sequences ALL \
+   --supercell 2 2 4 \
+   > LOG 2>&1 &
+   

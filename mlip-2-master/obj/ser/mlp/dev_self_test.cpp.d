@@ -1,0 +1,37 @@
+/Users/sulee/Projects/mlip-2-master/obj/ser/mlp/dev_self_test.cpp.o: \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/dev_self_test.cpp \
+  cblas/cblas.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../sample_potentials.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/basic_mlip.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/basic_potentials.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/neighborhoods.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/configuration.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlip.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/utils.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/matrix3.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/vector3.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/radial_basis.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/multidimensional_arrays.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../mtpr.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../eam.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/drivers/relaxation.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/drivers/basic_drivers.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/drivers/../mlip.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/drivers/../basic_potentials.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/drivers/../common/bfgs.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/drivers/../common/multidimensional_arrays.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/drivers/../common/utils.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../mtpr_trainer.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/stdafx.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../non_linear_regression.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/basic_trainer.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/bfgs.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlip_wrapper.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/lotf.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/active_learning.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/maxvol.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/linear_regression.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mtp.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/error_monitor.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlp/self_test.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../sw_basis.h

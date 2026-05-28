@@ -1,0 +1,30 @@
+/Users/sulee/Projects/mlip-2-master/obj/ser/mlp/self_test.cpp.o: \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/self_test.cpp \
+  cblas/cblas.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/relaxation.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/basic_drivers.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../mlip.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../common/utils.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../basic_potentials.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../neighborhoods.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../configuration.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../common/matrix3.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../common/vector3.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../common/bfgs.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../drivers/../common/multidimensional_arrays.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../mlip_wrapper.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../lotf.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../basic_trainer.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../basic_mlip.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../basic_potentials.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../radial_basis.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../mlip.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../common/multidimensional_arrays.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../active_learning.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../maxvol.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../common/stdafx.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../linear_regression.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../mtp.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../configuration.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../neighborhoods.h \
+  /Users/sulee/Projects/mlip-2-master/src/mlp/../error_monitor.h

@@ -1,0 +1,31 @@
+/Users/sulee/Projects/mlip-2-master/obj/ser/mlp/dev_mlp_commands.cpp.o: \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/dev_mlp_commands.cpp \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlp/mlp.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/stdafx.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlip_wrapper.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/lotf.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/basic_trainer.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/basic_mlip.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/basic_potentials.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/neighborhoods.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/configuration.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlip.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/utils.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/matrix3.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/vector3.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/radial_basis.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/multidimensional_arrays.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/active_learning.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/maxvol.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/linear_regression.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mtp.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/error_monitor.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../dev_src/mlp/dev_self_test.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlp/self_test.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlp/train.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlp/../linear_regression.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/mlp/calc_errors.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../mtpr.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../mtpr_trainer.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../non_linear_regression.h \
+  /Users/sulee/Projects/mlip-2-master/dev_src/mlp/../../src/common/bfgs.h

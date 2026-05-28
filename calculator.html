@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>계산기</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .calculator {
+      background: #16213e;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      width: 320px;
+    }
+
+    .display {
+      background: #0f3460;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      text-align: right;
+    }
+
+    .display .expression {
+      color: #a0aec0;
+      font-size: 14px;
+      min-height: 20px;
+      margin-bottom: 6px;
+      word-break: break-all;
+    }
+
+    .display .result {
+      color: #e2e8f0;
+      font-size: 36px;
+      font-weight: 300;
+      word-break: break-all;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.93);
+      opacity: 0.8;
+    }
+
+    .btn-number {
+      background: #1a365d;
+      color: #e2e8f0;
+    }
+
+    .btn-number:hover {
+      background: #2a4a7f;
+    }
+
+    .btn-operator {
+      background: #2d6a4f;
+      color: #d8f3dc;
+    }
+
+    .btn-operator:hover {
+      background: #3a8a65;
+    }
+
+    .btn-equals {
+      background: #e94560;
+      color: #fff;
+      grid-column: span 2;
+    }
+
+    .btn-equals:hover {
+      background: #f05672;
+    }
+
+    .btn-clear {
+      background: #c53030;
+      color: #fff;
+    }
+
+    .btn-clear:hover {
+      background: #e03535;
+    }
+
+    .btn-special {
+      background: #2d3748;
+      color: #a0aec0;
+    }
+
+    .btn-special:hover {
+      background: #3d4a5c;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display">
+      <div class="expression" id="expression"></div>
+      <div class="result" id="result">0</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-clear" onclick="clearAll()">AC</button>
+      <button class="btn-special" onclick="toggleSign()">+/-</button>
+      <button class="btn-special" onclick="percentage()">%</button>
+      <button class="btn-operator" onclick="setOperator('/')">÷</button>
+
+      <button class="btn-number" onclick="appendNumber('7')">7</button>
+      <button class="btn-number" onclick="appendNumber('8')">8</button>
+      <button class="btn-number" onclick="appendNumber('9')">9</button>
+      <button class="btn-operator" onclick="setOperator('*')">×</button>
+
+      <button class="btn-number" onclick="appendNumber('4')">4</button>
+      <button class="btn-number" onclick="appendNumber('5')">5</button>
+      <button class="btn-number" onclick="appendNumber('6')">6</button>
+      <button class="btn-operator" onclick="setOperator('-')">−</button>
+
+      <button class="btn-number" onclick="appendNumber('1')">1</button>
+      <button class="btn-number" onclick="appendNumber('2')">2</button>
+      <button class="btn-number" onclick="appendNumber('3')">3</button>
+      <button class="btn-operator" onclick="setOperator('+')">+</button>
+
+      <button class="btn-number" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
+      <button class="btn-number" onclick="appendDecimal()">.</button>
+      <button class="btn-equals" style="grid-column: span 1;" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    let current = '0';
+    let previous = '';
+    let operator = null;
+    let shouldReset = false;
+
+    const resultEl = document.getElementById('result');
+    const expressionEl = document.getElementById('expression');
+
+    function updateDisplay() {
+      resultEl.textContent = current;
+    }
+
+    function appendNumber(num) {
+      if (shouldReset) {
+        current = num;
+        shouldReset = false;
+      } else {
+        current = current === '0' ? num : current + num;
+      }
+      if (current.length > 12) current = current.slice(0, 12);
+      updateDisplay();
+    }
+
+    function appendDecimal() {
+      if (shouldReset) {
+        current = '0.';
+        shouldReset = false;
+      } else if (!current.includes('.')) {
+        current += '.';
+      }
+      updateDisplay();
+    }
+
+    function setOperator(op) {
+      if (operator && !shouldReset) {
+        calculate(true);
+      }
+      previous = current;
+      operator = op;
+      shouldReset = true;
+      const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+      expressionEl.textContent = `${previous} ${symbols[op]}`;
+    }
+
+    function calculate(chain = false) {
+      if (!operator || !previous) return;
+      const a = parseFloat(previous);
+      const b = parseFloat(current);
+      let res;
+      switch (operator) {
+        case '+': res = a + b; break;
+        case '-': res = a - b; break;
+        case '*': res = a * b; break;
+        case '/': res = b === 0 ? 'Error' : a / b; break;
+      }
+      const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+      if (!chain) {
+        expressionEl.textContent = `${previous} ${symbols[operator]} ${current} =`;
+        operator = null;
+      }
+      current = res === 'Error' ? 'Error' : String(parseFloat(res.toFixed(10)));
+      shouldReset = true;
+      updateDisplay();
+    }
+
+    function clearAll() {
+      current = '0';
+      previous = '';
+      operator = null;
+      shouldReset = false;
+      expressionEl.textContent = '';
+      updateDisplay();
+    }
+
+    function toggleSign() {
+      if (current !== '0' && current !== 'Error') {
+        current = current.startsWith('-') ? current.slice(1) : '-' + current;
+        updateDisplay();
+      }
+    }
+
+    function percentage() {
+      if (current !== 'Error') {
+        current = String(parseFloat(current) / 100);
+        updateDisplay();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+      else if (e.key === '.') appendDecimal();
+      else if (e.key === '+') setOperator('+');
+      else if (e.key === '-') setOperator('-');
+      else if (e.key === '*') setOperator('*');
+      else if (e.key === '/') { e.preventDefault(); setOperator('/'); }
+      else if (e.key === 'Enter' || e.key === '=') calculate();
+      else if (e.key === 'Escape') clearAll();
+      else if (e.key === 'Backspace') {
+        if (current.length > 1 && current !== 'Error') {
+          current = current.slice(0, -1);
+          updateDisplay();
+        } else {
+          current = '0';
+          updateDisplay();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

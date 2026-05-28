@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaxVol 알고리즘 — 직관적 이해</title>
+<style>
+:root {
+  --blue:   #2563eb;
+  --dblue:  #1e3a8a;
+  --lblue:  #dbeafe;
+  --green:  #16a34a;
+  --lgreen: #dcfce7;
+  --red:    #dc2626;
+  --lred:   #fee2e2;
+  --orange: #ea580c;
+  --lorange:#fff7ed;
+  --purple: #7c3aed;
+  --lpurple:#ede9fe;
+  --gray:   #64748b;
+  --lgray:  #f1f5f9;
+  --border: #e2e8f0;
+  --text:   #1e293b;
+  --bg:     #f8fafc;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.75;
+  font-size: 16px;
+}
+.page { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* header */
+header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 60%, #06b6d4 100%);
+  color: white;
+  padding: 52px 0 40px;
+  margin-bottom: 56px;
+}
+header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; }
+header .sub { font-size: 1.05rem; opacity: .88; }
+header .badge {
+  display: inline-block;
+  background: rgba(255,255,255,.2);
+  border: 1px solid rgba(255,255,255,.4);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: .82rem;
+  margin-top: 14px;
+}
+
+/* chapter */
+.chapter {
+  margin-bottom: 72px;
+}
+.chapter-num {
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+.chapter h2 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--dblue);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.chapter .lead {
+  font-size: 1.05rem;
+  color: var(--gray);
+  margin-bottom: 28px;
+  border-left: 3px solid var(--border);
+  padding-left: 14px;
+}
+
+/* analogy box */
+.analogy {
+  background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%);
+  border: 1.5px solid #fbbf24;
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin: 20px 0;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.analogy .icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+.analogy .body strong { display: block; font-size: 1rem; margin-bottom: 4px; color: #92400e; }
+.analogy .body { font-size: .95rem; color: #78350f; }
+
+/* card row */
+.card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+}
+.card-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.card {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.card .card-icon { font-size: 2rem; margin-bottom: 10px; }
+.card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--dblue); }
+.card p  { font-size: .9rem; color: var(--gray); line-height: 1.6; }
+
+/* vs box */
+.vs-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  margin: 24px 0;
+}
+.vs-label {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--gray);
+  text-align: center;
+}
+.vs-bad  { background: var(--lred);   border: 2px solid var(--red);   border-radius: 12px; padding: 18px; }
+.vs-good { background: var(--lgreen); border: 2px solid var(--green); border-radius: 12px; padding: 18px; }
+.vs-bad  h3 { color: var(--red);   font-size: .95rem; margin-bottom: 6px; }
+.vs-good h3 { color: var(--green); font-size: .95rem; margin-bottom: 6px; }
+.vs-bad  p, .vs-good p { font-size: .88rem; line-height: 1.6; }
+
+/* step flow */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 24px 0;
+}
+.flow-item {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+.flow-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 22px; top: 48px;
+  width: 2px; height: calc(100% - 12px);
+  background: var(--border);
+}
+.flow-num {
+  flex: 0 0 44px; height: 44px;
+  background: var(--blue); color: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1.1rem;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.flow-body {
+  flex: 1;
+  padding: 6px 0 28px;
+}
+.flow-body h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.flow-body p  { font-size: .92rem; color: var(--gray); }
+
+/* highlight box */
+.hl {
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: .95rem;
+}
+.hl-blue   { background: var(--lblue);   border-left: 4px solid var(--blue); }
+.hl-green  { background: var(--lgreen);  border-left: 4px solid var(--green); }
+.hl-orange { background: var(--lorange); border-left: 4px solid var(--orange); }
+.hl-purple { background: var(--lpurple); border-left: 4px solid var(--purple); }
+.hl strong { display: block; margin-bottom: 4px; }
+
+/* gauge */
+.gauge-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+.gauge-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.gauge-label { width: 120px; font-size: .88rem; font-weight: 600; flex-shrink: 0; }
+.gauge-bar-bg {
+  flex: 1;
+  height: 28px;
+  background: var(--lgray);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.gauge-bar {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-size: .82rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+}
+.gauge-val { font-size: .88rem; font-weight: 700; width: 56px; text-align: right; flex-shrink: 0; }
+
+/* big quote */
+.big-quote {
+  text-align: center;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin: 24px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.big-quote .formula {
+  font-family: 'Georgia', serif;
+  font-size: 1.4rem;
+  color: var(--dblue);
+  font-style: italic;
+  margin-bottom: 10px;
+}
+.big-quote .explain { font-size: .92rem; color: var(--gray); }
+
+/* summary table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: .92rem;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+th {
+  background: var(--dblue);
+  color: white;
+  padding: 11px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: .88rem;
+}
+td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border: none; }
+tr:nth-child(even) td { background: var(--lgray); }
+
+/* pill */
+.pill {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 700;
+}
+.pill-green  { background: var(--lgreen);  color: #166534; }
+.pill-red    { background: var(--lred);    color: #991b1b; }
+.pill-orange { background: var(--lorange); color: #9a3412; }
+.pill-blue   { background: var(--lblue);   color: #1e40af; }
+
+/* divider */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 48px 0;
+}
+
+figure { margin: 24px 0; overflow-x: auto; }
+figcaption {
+  text-align: center;
+  font-size: .85rem;
+  color: var(--gray);
+  margin-top: 10px;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .card-row, .card-row.three { grid-template-columns: 1fr; }
+  .vs-row { grid-template-columns: 1fr; }
+  .vs-label { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="page">
+    <h1>MaxVol 알고리즘</h1>
+    <div class="sub">수식 없이 이해하는 MLIP Active Learning의 핵심 아이디어</div>
+    <div class="badge">직관적 설명 버전</div>
+  </div>
+</header>
+
+<div class="page">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CHAPTER 1: 핵심 질문 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 1</div>
+  <h2>결국 "어떤 구조를 골라야 하는가?"</h2>
+  <p class="lead">MTP 학습에는 DFT 계산이 필요합니다. 그런데 DFT는 매우 비쌉니다.<br>
+  핵심 질문: 무수히 많은 후보 구조 중 <strong>어떤 것을 DFT로 계산해야 하나?</strong></p>
+
+  <div class="analogy">
+    <div class="icon">📚</div>
+    <div class="body">
+      <strong>도서관 비유</strong>
+      MTP 포텐셜을 "도서관"에 비유하면, 각 책(훈련 데이터)은 특정 화학 환경에 대한 지식입니다.
+      이미 비슷한 책이 10권 있다면 11번째는 필요 없습니다.
+      <strong>진짜 새로운 내용을 담은 책만 사야 합니다.</strong>
+    </div>
+  </div>
+
+  <div class="vs-row">
+    <div class="vs-bad">
+      <h3>❌ 나쁜 선택 — 비슷한 구조만 반복</h3>
+      <p>조금씩 다른 FCC 구조 1000개를 계산<br>
+      → 포텐셜이 BCC나 액체 상태는 전혀 모름<br>
+      → 비용만 크고 정확도는 제자리</p>
+    </div>
+    <div class="vs-label">VS</div>
+    <div class="vs-good">
+      <h3>✅ 좋은 선택 — 다양한 환경 커버</h3>
+      <p>FCC, BCC, 표면, 액체, 결함 등 대표 구조 100개 계산<br>
+      → 다양한 화학 환경을 커버<br>
+      → 적은 비용으로 높은 정확도</p>
+    </div>
+  </div>
+
+  <div class="hl hl-blue">
+    <strong>MaxVol의 역할</strong>
+    "가장 다양한 화학 환경을 커버하는 N개의 구조"를 자동으로 골라줍니다.
+    여기서 N은 MTP 파라미터의 수입니다.
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CHAPTER 2: 지문 (Feature Vector) -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 2</div>
+  <h2>구조의 "지문" — Feature Vector</h2>
+  <p class="lead">두 구조가 "얼마나 다른지" 비교하려면 각 구조를 숫자로 표현해야 합니다.</p>
+
+  <div class="analogy">
+    <div class="icon">🧬</div>
+    <div class="body">
+      <strong>DNA 지문 비유</strong>
+      사람마다 DNA가 다르듯, 각 원자 구조도 고유한 "지문"이 있습니다.
+      MLIP에서 이 지문은 <strong>"MTP 에너지 파라미터에 대한 gradient 벡터"</strong>입니다.
+      비슷한 환경의 구조는 비슷한 지문을, 전혀 다른 환경은 전혀 다른 지문을 가집니다.
+    </div>
+  </div>
+
+  <!-- SVG: fingerprint concept -->
+  <figure>
+  <svg width="800" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" font-family="'Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="13">
+    <rect width="800" height="200" fill="#f8fafc" rx="12"/>
+
+    <!-- Structure 1: FCC-like -->
+    <g transform="translate(30,20)">
+      <text x="75" y="16" text-anchor="middle" font-weight="700" fill="#1e3a8a" font-size="13">구조 A (FCC)</text>
+      <!-- atoms -->
+      <circle cx="50" cy="70" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="100" cy="70" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="75" cy="110" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="125" cy="110" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="25" cy="110" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <!-- label -->
+      <text x="75" y="148" text-anchor="middle" fill="#64748b" font-size="11">규칙적인 배열</text>
+    </g>
+
+    <!-- Arrow 1 -->
+    <g transform="translate(165,80)">
+      <line x1="0" y1="20" x2="50" y2="20" stroke="#64748b" stroke-width="2" marker-end="url(#aw1)"/>
+      <text x="25" y="12" text-anchor="middle" fill="#64748b" font-size="11">지문화</text>
+    </g>
+
+    <!-- Fingerprint 1 -->
+    <g transform="translate(225,30)">
+      <text x="65" y="0" text-anchor="middle" fill="#1e3a8a" font-size="12" font-weight="700">지문 A</text>
+      <rect x="0" y="10" width="130" height="50" fill="white" stroke="#2563eb" stroke-width="1" rx="4"/>
+      <rect x="5"  y="15" width="8"  height="38" fill="#2563eb" rx="2"/>
+      <rect x="17" y="25" width="8"  height="28" fill="#2563eb" rx="2"/>
+      <rect x="29" y="20" width="8"  height="33" fill="#2563eb" rx="2"/>
+      <rect x="41" y="30" width="8"  height="23" fill="#2563eb" rx="2"/>
+      <rect x="53" y="22" width="8"  height="31" fill="#2563eb" rx="2"/>
+      <rect x="65" y="18" width="8"  height="35" fill="#2563eb" rx="2"/>
+      <rect x="77" y="28" width="8"  height="25" fill="#2563eb" rx="2"/>
+      <rect x="89" y="14" width="8"  height="39" fill="#2563eb" rx="2"/>
+      <rect x="101" y="24" width="8" height="29" fill="#2563eb" rx="2"/>
+      <rect x="113" y="19" width="8" height="34" fill="#2563eb" rx="2"/>
+      <text x="65" y="78" text-anchor="middle" fill="#64748b" font-size="10">N차원 숫자 벡터</text>
+    </g>
+
+    <!-- Structure 2: defect -->
+    <g transform="translate(390,20)">
+      <text x="75" y="16" text-anchor="middle" font-weight="700" fill="#9a3412" font-size="13">구조 B (결함)</text>
+      <circle cx="50" cy="70" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="100" cy="70" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="75" cy="110" r="16" fill="#fca5a5" stroke="#dc2626" stroke-width="2" stroke-dasharray="3,2"/>
+      <circle cx="125" cy="110" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="25" cy="110" r="16" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+      <text x="75" y="96" text-anchor="middle" fill="#dc2626" font-size="10" font-weight="700">vacancy</text>
+      <text x="75" y="148" text-anchor="middle" fill="#64748b" font-size="11">결함 포함</text>
+    </g>
+
+    <!-- Arrow 2 -->
+    <g transform="translate(525,80)">
+      <line x1="0" y1="20" x2="50" y2="20" stroke="#64748b" stroke-width="2" marker-end="url(#aw1)"/>
+      <text x="25" y="12" text-anchor="middle" fill="#64748b" font-size="11">지문화</text>
+    </g>
+
+    <!-- Fingerprint 2 -->
+    <g transform="translate(585,30)">
+      <text x="65" y="0" text-anchor="middle" fill="#9a3412" font-size="12" font-weight="700">지문 B (전혀 다름)</text>
+      <rect x="0" y="10" width="130" height="50" fill="white" stroke="#dc2626" stroke-width="1" rx="4"/>
+      <rect x="5"  y="28" width="8"  height="25" fill="#dc2626" rx="2"/>
+      <rect x="17" y="15" width="8"  height="38" fill="#dc2626" rx="2"/>
+      <rect x="29" y="35" width="8"  height="18" fill="#dc2626" rx="2"/>
+      <rect x="41" y="20" width="8"  height="33" fill="#dc2626" rx="2"/>
+      <rect x="53" y="38" width="8"  height="15" fill="#dc2626" rx="2"/>
+      <rect x="65" y="25" width="8"  height="28" fill="#dc2626" rx="2"/>
+      <rect x="77" y="16" width="8"  height="37" fill="#dc2626" rx="2"/>
+      <rect x="89" y="32" width="8"  height="21" fill="#dc2626" rx="2"/>
+      <rect x="101" y="18" width="8" height="35" fill="#dc2626" rx="2"/>
+      <rect x="113" y="40" width="8" height="13" fill="#dc2626" rx="2"/>
+      <text x="65" y="78" text-anchor="middle" fill="#64748b" font-size="10">완전히 다른 패턴</text>
+    </g>
+
+    <defs>
+      <marker id="aw1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/>
+      </marker>
+    </defs>
+  </svg>
+  <figcaption>그림 1. 다른 구조는 다른 "지문"(feature vector)을 가집니다.</figcaption>
+  </figure>
+
+  <div class="card-row three">
+    <div class="card">
+      <div class="card-icon">🔢</div>
+      <h3>지문의 정체</h3>
+      <p>MTP 에너지를 N개 파라미터로 미분한 값들의 묶음 (N차원 벡터)</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🤝</div>
+      <h3>비슷한 환경 = 비슷한 지문</h3>
+      <p>원자 배열이 비슷하면 지문도 비슷 → 새 정보 없음</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🆕</div>
+      <h3>다른 환경 = 다른 지문</h3>
+      <p>처음 보는 배열은 지문이 크게 다름 → 꼭 학습 필요!</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CHAPTER 3: 부피 = 다양성 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 3</div>
+  <h2>"부피가 크다" = "다양하다"</h2>
+  <p class="lead">MaxVol은 선택된 구조들의 지문 벡터가 이루는 <strong>평행육면체의 부피</strong>를 최대화합니다.<br>
+  왜 부피를 최대화할까요?</p>
+
+  <div class="analogy">
+    <div class="icon">🗺️</div>
+    <div class="body">
+      <strong>지도 탐험가 비유</strong>
+      미지의 땅(feature space)을 탐험하는 탐험가를 상상하세요.
+      이미 방문한 장소(훈련 데이터)가 한 지역에 몰려 있다면, 나머지 땅은 여전히 미지입니다.
+      <strong>부피가 크다 = 탐험가들이 넓게 퍼져 있다 = feature space를 골고루 커버한다</strong>는 뜻입니다.
+    </div>
+  </div>
+
+  <!-- SVG: volume = diversity -->
+  <figure>
+  <svg width="800" height="260" viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg" font-family="'Apple SD Gothic Neo','Malgun Gothic',sans-serif">
+    <rect width="800" height="260" fill="#f8fafc" rx="12"/>
+
+    <defs>
+      <marker id="aw2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L5,3 L0,6 Z" fill="#64748b"/>
+      </marker>
+    </defs>
+
+    <!-- LEFT: small volume / clustered -->
+    <g transform="translate(30,20)">
+      <text x="140" y="0" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">나쁜 선택: 부피 작음</text>
+
+      <!-- axes -->
+      <line x1="20" y1="210" x2="250" y2="210" stroke="#cbd5e1" stroke-width="1" marker-end="url(#aw2)"/>
+      <line x1="20" y1="210" x2="20" y2="20" stroke="#cbd5e1" stroke-width="1" marker-end="url(#aw2)"/>
+      <text x="255" y="214" font-size="10" fill="#94a3b8">지문 차원 1</text>
+      <text x="24" y="18" font-size="10" fill="#94a3b8">지문 차원 2</text>
+
+      <!-- many similar points clustered -->
+      <circle cx="90" cy="150" r="5" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+      <circle cx="105" cy="145" r="5" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+      <circle cx="95" cy="160" r="5" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+      <circle cx="110" cy="155" r="5" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+      <circle cx="100" cy="140" r="5" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+      <circle cx="115" cy="165" r="5" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+      <circle cx="85" cy="155" r="5" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+      <circle cx="120" cy="148" r="5" fill="#fca5a5" stroke="#dc2626" stroke-width="1"/>
+
+      <!-- small parallelogram -->
+      <polygon points="85,140 120,135 125,165 90,170" fill="rgba(239,68,68,0.15)" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <text x="100" y="195" text-anchor="middle" font-size="11" fill="#dc2626">한 영역에 몰려있음</text>
+      <text x="100" y="212" text-anchor="middle" font-size="11" fill="#dc2626">부피 ≈ 0 → 정보 중복</text>
+
+      <!-- unvisited region -->
+      <circle cx="180" cy="80" r="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+      <circle cx="60" cy="100" r="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+      <circle cx="200" cy="170" r="5" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+      <text x="180" y="70" font-size="10" fill="#94a3b8" text-anchor="middle">미탐색</text>
+    </g>
+
+    <!-- CENTER arrow -->
+    <g transform="translate(310,110)">
+      <text x="45" y="-10" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">MaxVol</text>
+      <text x="45" y="6" text-anchor="middle" font-size="12" fill="#16a34a" font-weight="700">선택</text>
+      <line x1="0" y1="10" x2="90" y2="10" stroke="#16a34a" stroke-width="2.5" marker-end="url(#aw3)"/>
+      <defs>
+        <marker id="aw3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L5,3 L0,6 Z" fill="#16a34a"/>
+        </marker>
+      </defs>
+    </g>
+
+    <!-- RIGHT: large volume / spread -->
+    <g transform="translate(420,20)">
+      <text x="160" y="0" text-anchor="middle" font-size="14" font-weight="700" fill="#16a34a">좋은 선택: 부피 최대</text>
+
+      <line x1="20" y1="210" x2="310" y2="210" stroke="#cbd5e1" stroke-width="1" marker-end="url(#aw2)"/>
+      <line x1="20" y1="210" x2="20" y2="20" stroke="#cbd5e1" stroke-width="1" marker-end="url(#aw2)"/>
+      <text x="315" y="214" font-size="10" fill="#94a3b8">지문 차원 1</text>
+      <text x="24" y="18" font-size="10" fill="#94a3b8">지문 차원 2</text>
+
+      <!-- spread out points -->
+      <circle cx="55" cy="170" r="6" fill="#86efac" stroke="#16a34a" stroke-width="1.5"/>
+      <circle cx="220" cy="160" r="6" fill="#86efac" stroke="#16a34a" stroke-width="1.5"/>
+      <circle cx="80"  cy="50"  r="6" fill="#86efac" stroke="#16a34a" stroke-width="1.5"/>
+      <circle cx="260" cy="60"  r="6" fill="#86efac" stroke="#16a34a" stroke-width="1.5"/>
+      <circle cx="145" cy="130" r="6" fill="#86efac" stroke="#16a34a" stroke-width="1.5"/>
+
+      <!-- large parallelogram -->
+      <polygon points="55,170 220,160 260,60 80,50" fill="rgba(22,163,74,0.12)" stroke="#16a34a" stroke-width="2"/>
+
+      <text x="160" y="195" text-anchor="middle" font-size="11" fill="#16a34a">feature space 전체 커버</text>
+      <text x="160" y="212" text-anchor="middle" font-size="11" fill="#16a34a">부피 최대 → 정보 최대</text>
+    </g>
+  </svg>
+  <figcaption>그림 2. 선택된 구조들의 지문이 이루는 "공간의 부피"가 클수록 다양한 환경을 커버합니다.</figcaption>
+  </figure>
+
+  <div class="hl hl-green">
+    <strong>핵심 원리</strong>
+    MaxVol = "선택된 N개 구조의 지문 벡터로 만든 N×N 행렬의 행렬식(det)이 최대"가 되도록 구조를 선택.
+    행렬식 = 평행육면체의 부피. 부피가 크다 = 지문들이 서로 독립적 = 다양한 환경 커버.
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CHAPTER 4: Extrapolation Grade γ -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 4</div>
+  <h2>γ (gamma) — "얼마나 낯선 구조인가?"</h2>
+  <p class="lead">새로운 구조가 기존에 학습한 것과 얼마나 다른지를 수치로 표현한 값입니다.</p>
+
+  <div class="analogy">
+    <div class="icon">😮</div>
+    <div class="body">
+      <strong>놀라움 점수 비유</strong>
+      포텐셜이 "이 구조는 본 적 없는데?" 라고 느끼는 정도를 0~∞로 점수를 매깁니다.
+      이미 학습한 것과 비슷하면 낮은 점수(γ ≈ 1), 전혀 새로운 환경이면 높은 점수(γ >> 1).
+    </div>
+  </div>
+
+  <!-- γ gauge visualization -->
+  <div class="gauge-row">
+    <div class="gauge-item">
+      <div class="gauge-label">γ = 0.5<br><span style="font-size:.78rem;color:var(--gray)">완전한 내삽</span></div>
+      <div class="gauge-bar-bg">
+        <div class="gauge-bar" style="width:8%; background:var(--green);">안전</div>
+      </div>
+      <div class="gauge-val" style="color:var(--green)">0.5</div>
+    </div>
+    <div class="gauge-item">
+      <div class="gauge-label">γ = 1.0<br><span style="font-size:.78rem;color:var(--gray)">경계선</span></div>
+      <div class="gauge-bar-bg">
+        <div class="gauge-bar" style="width:15%; background:var(--green);">기준</div>
+      </div>
+      <div class="gauge-val" style="color:var(--gray)">1.0</div>
+    </div>
+    <div class="gauge-item">
+      <div class="gauge-label">γ = 3.0<br><span style="font-size:.78rem;color:var(--orange)">γ_select</span></div>
+      <div class="gauge-bar-bg">
+        <div class="gauge-bar" style="width:42%; background:var(--orange);">저장 필요</div>
+      </div>
+      <div class="gauge-val" style="color:var(--orange)">3.0</div>
+    </div>
+    <div class="gauge-item">
+      <div class="gauge-label">γ = 7.0<br><span style="font-size:.78rem;color:var(--red)">위험</span></div>
+      <div class="gauge-bar-bg">
+        <div class="gauge-bar" style="width:72%; background:var(--red);">재학습 긴급</div>
+      </div>
+      <div class="gauge-val" style="color:var(--red)">7.0</div>
+    </div>
+    <div class="gauge-item">
+      <div class="gauge-label">γ > 10.0<br><span style="font-size:.78rem;color:var(--red)">γ_break</span></div>
+      <div class="gauge-bar-bg">
+        <div class="gauge-bar" style="width:100%; background:#7f1d1d;">⛔ 강제 종료</div>
+      </div>
+      <div class="gauge-val" style="color:#7f1d1d">>10</div>
+    </div>
+  </div>
+
+  <!-- 3 cases visual -->
+  <figure>
+  <svg width="800" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" font-family="'Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="12">
+    <rect width="800" height="220" fill="#f8fafc" rx="12"/>
+    <defs>
+      <marker id="avb" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L5,3 L0,6 Z" fill="#16a34a"/>
+      </marker>
+      <marker id="avo" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L5,3 L0,6 Z" fill="#ea580c"/>
+      </marker>
+      <marker id="avr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L5,3 L0,6 Z" fill="#dc2626"/>
+      </marker>
+    </defs>
+
+    <!-- Case 1: inside -->
+    <g transform="translate(20,20)">
+      <rect x="0" y="0" width="220" height="160" fill="white" stroke="#e2e8f0" stroke-width="1" rx="8"/>
+      <text x="110" y="22" text-anchor="middle" font-weight="700" fill="#16a34a" font-size="13">γ &lt; γ_select (안전)</text>
+
+      <!-- training set boundary -->
+      <ellipse cx="110" cy="90" rx="75" ry="50" fill="rgba(22,163,74,0.1)" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="60" y="56" font-size="10" fill="#16a34a">훈련 영역</text>
+
+      <!-- existing points -->
+      <circle cx="90"  cy="80" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="130" cy="85" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="110" cy="110" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="85"  cy="105" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="135" cy="70" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+
+      <!-- new point inside -->
+      <circle cx="112" cy="92" r="7" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+      <text x="128" y="90" font-size="10" fill="#ca8a04" font-weight="700">새 구조</text>
+
+      <text x="110" y="148" text-anchor="middle" font-size="11" fill="#16a34a">→ 계속 진행</text>
+    </g>
+
+    <!-- Case 2: edge -->
+    <g transform="translate(280,20)">
+      <rect x="0" y="0" width="220" height="160" fill="white" stroke="#e2e8f0" stroke-width="1" rx="8"/>
+      <text x="110" y="22" text-anchor="middle" font-weight="700" fill="#ea580c" font-size="13">γ_select &lt; γ ≤ γ_break</text>
+
+      <ellipse cx="100" cy="90" rx="75" ry="50" fill="rgba(234,88,12,0.08)" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="50" y="56" font-size="10" fill="#ea580c">훈련 영역</text>
+
+      <circle cx="80"  cy="80" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="120" cy="85" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="100" cy="110" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="75"  cy="105" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="125" cy="70" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+
+      <!-- new point outside -->
+      <circle cx="188" cy="65" r="7" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+      <line x1="172" y1="88" x2="184" y2="70" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#avo)"/>
+      <text x="192" y="56" font-size="10" fill="#ea580c" font-weight="700">새 구조</text>
+
+      <text x="110" y="142" text-anchor="middle" font-size="11" fill="#ea580c">→ B-preselected.cfg 저장</text>
+      <text x="110" y="156" text-anchor="middle" font-size="11" fill="#ea580c">→ DFT 계산 후보</text>
+    </g>
+
+    <!-- Case 3: far outside -->
+    <g transform="translate(540,20)">
+      <rect x="0" y="0" width="220" height="160" fill="white" stroke="#e2e8f0" stroke-width="1" rx="8"/>
+      <text x="110" y="22" text-anchor="middle" font-weight="700" fill="#dc2626" font-size="13">γ &gt; γ_break (위험)</text>
+
+      <ellipse cx="85" cy="95" rx="65" ry="45" fill="rgba(220,38,38,0.08)" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="35" y="60" font-size="10" fill="#dc2626">훈련 영역</text>
+
+      <circle cx="70"  cy="85" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="105" cy="90" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="85"  cy="115" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+      <circle cx="65"  cy="108" r="5" fill="#86efac" stroke="#16a34a" stroke-width="1"/>
+
+      <!-- new point very far -->
+      <circle cx="195" cy="40" r="7" fill="#fecaca" stroke="#dc2626" stroke-width="2.5"/>
+      <line x1="148" y1="75" x2="190" y2="46" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#avr)"/>
+      <text x="190" y="30" font-size="10" fill="#dc2626" font-weight="700">새 구조</text>
+
+      <text x="110" y="142" text-anchor="middle" font-size="11" fill="#dc2626">⛔ 프로그램 강제 종료</text>
+      <text x="110" y="156" text-anchor="middle" font-size="11" fill="#dc2626">포텐셜 신뢰 불가</text>
+    </g>
+  </svg>
+  <figcaption>그림 3. γ 값에 따른 세 가지 상황. 노란 점이 새 구조입니다.</figcaption>
+  </figure>
+
+  <div class="big-quote">
+    <div class="formula">γ = "새 구조의 지문"을 "기존 basis"에 투영했을 때 얼마나 삐져나오는가</div>
+    <div class="explain">기존 훈련 데이터가 커버하는 공간 밖으로 새 구조가 얼마나 벗어나는지의 비율입니다.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CHAPTER 5: Swap -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 5</div>
+  <h2>Swap — 더 좋은 구조로 교체</h2>
+  <p class="lead">γ가 크다는 것은 새 구조가 기존 basis보다 "부피 기여도"가 높다는 뜻입니다.<br>
+  그러면 기존 basis에서 가장 덜 중요한 구조를 새 구조로 교체합니다.</p>
+
+  <div class="analogy">
+    <div class="icon">🔄</div>
+    <div class="body">
+      <strong>스타팅 멤버 교체 비유</strong>
+      농구팀에 11명이 있는데 5명만 출전할 수 있다고 합시다 (N=5).
+      벤치에서 새 선수가 나타났는데 현재 선발 5명보다 훨씬 뛰어나다면?
+      → 가장 기여도가 낮은 선발 선수를 벤치로 보내고 새 선수를 투입합니다.
+      MaxVol의 Swap이 바로 이것입니다.
+    </div>
+  </div>
+
+  <!-- Swap visual -->
+  <figure>
+  <svg width="800" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" font-family="'Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="12">
+    <rect width="800" height="180" fill="#f8fafc" rx="12"/>
+    <defs>
+      <marker id="asw2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#ea580c"/>
+      </marker>
+    </defs>
+
+    <!-- Before: A matrix rows -->
+    <g transform="translate(30,20)">
+      <text x="145" y="0" text-anchor="middle" font-weight="700" fill="#1e3a8a" font-size="14">Swap 전</text>
+      <!-- row 1 -->
+      <rect x="0" y="15" width="290" height="24" fill="#dbeafe" rx="3"/>
+      <text x="10" y="32" fill="#1e3a8a">Basis[0]: φ(구조 A) — 매우 유용</text>
+      <!-- row 2 -->
+      <rect x="0" y="42" width="290" height="24" fill="#dbeafe" rx="3"/>
+      <text x="10" y="59" fill="#1e3a8a">Basis[1]: φ(구조 B) — 유용</text>
+      <!-- row 3 — to be replaced -->
+      <rect x="0" y="69" width="290" height="24" fill="#fde68a" rx="3" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="10" y="86" fill="#92400e" font-weight="700">Basis[2]: φ(구조 C) — 기여도 낮음 ← 교체 대상</text>
+      <!-- row 4 -->
+      <rect x="0" y="96" width="290" height="24" fill="#dbeafe" rx="3"/>
+      <text x="10" y="113" fill="#1e3a8a">Basis[3]: φ(구조 D) — 유용</text>
+      <!-- row 5 -->
+      <rect x="0" y="123" width="290" height="24" fill="#dbeafe" rx="3"/>
+      <text x="10" y="140" fill="#1e3a8a">Basis[4]: φ(구조 E) — 유용</text>
+
+      <!-- new candidate -->
+      <rect x="0" y="153" width="290" height="22" fill="#fff7ed" rx="3" stroke="#ea580c" stroke-width="1.5"/>
+      <text x="10" y="169" fill="#ea580c" font-weight="700">후보: φ(새 구조) — γ=4.5 &gt; γ_swap → 교체!</text>
+    </g>
+
+    <!-- Arrow -->
+    <g transform="translate(345,75)">
+      <line x1="0" y1="20" x2="80" y2="20" stroke="#ea580c" stroke-width="3" marker-end="url(#asw2)"/>
+      <text x="40" y="12" text-anchor="middle" fill="#ea580c" font-weight="700" font-size="13">Swap!</text>
+      <text x="40" y="36" text-anchor="middle" fill="#ea580c" font-size="11">×4.5 부피 증가</text>
+    </g>
+
+    <!-- After -->
+    <g transform="translate(445,20)">
+      <text x="150" y="0" text-anchor="middle" font-weight="700" fill="#16a34a" font-size="14">Swap 후</text>
+      <rect x="0" y="15" width="290" height="24" fill="#dbeafe" rx="3"/>
+      <text x="10" y="32" fill="#1e3a8a">Basis[0]: φ(구조 A) — 매우 유용</text>
+      <rect x="0" y="42" width="290" height="24" fill="#dbeafe" rx="3"/>
+      <text x="10" y="59" fill="#1e3a8a">Basis[1]: φ(구조 B) — 유용</text>
+      <!-- new row -->
+      <rect x="0" y="69" width="290" height="24" fill="#dcfce7" rx="3" stroke="#16a34a" stroke-width="1.5"/>
+      <text x="10" y="86" fill="#166534" font-weight="700">Basis[2]: φ(새 구조) ← 새로 투입! 부피↑</text>
+      <rect x="0" y="96" width="290" height="24" fill="#dbeafe" rx="3"/>
+      <text x="10" y="113" fill="#1e3a8a">Basis[3]: φ(구조 D) — 유용</text>
+      <rect x="0" y="123" width="290" height="24" fill="#dbeafe" rx="3"/>
+      <text x="10" y="140" fill="#1e3a8a">Basis[4]: φ(구조 E) — 유용</text>
+
+      <rect x="0" y="153" width="290" height="22" fill="#f1f5f9" rx="3" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="10" y="169" fill="#94a3b8">구조 C → 제거됨 (기여도 낮아서)</text>
+    </g>
+  </svg>
+  <figcaption>그림 4. Swap: 기여도가 낮은 기존 구조를 새로운 고γ 구조로 교체합니다.</figcaption>
+  </figure>
+
+  <div class="card-row">
+    <div class="card">
+      <div class="card-icon">🔁</div>
+      <h3>언제 Swap하나?</h3>
+      <p>새 구조의 grade γ가 swap threshold(≈1.0)보다 크면 교체.<br>
+      이를 γ &lt; 1.0이 될 때까지 반복합니다.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h3>빠른 역행렬 갱신</h3>
+      <p>한 행만 바꾸므로 A⁻¹을 전부 다시 계산하지 않고 Sherman-Morrison 공식으로 O(N²) 만에 갱신합니다.</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CHAPTER 6: 전체 흐름 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">Chapter 6</div>
+  <h2>MLIP Active Learning 전체 흐름</h2>
+  <p class="lead">MaxVol이 Step A, B, C에서 어떤 역할을 하는지 한눈에 봅니다.</p>
+
+  <!-- Big flow SVG -->
+  <figure>
+  <svg width="800" height="480" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg" font-family="'Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="12">
+    <rect width="800" height="480" fill="#f8fafc" rx="12"/>
+    <defs>
+      <marker id="afl" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/>
+      </marker>
+      <marker id="aflg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#16a34a"/>
+      </marker>
+    </defs>
+
+    <!-- STEP A -->
+    <rect x="30" y="30" width="220" height="110" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="140" y="55" text-anchor="middle" font-weight="800" fill="#1e3a8a" font-size="15">Step A</text>
+    <text x="140" y="73" text-anchor="middle" fill="#1e3a8a" font-size="12">mlp calc-grade</text>
+    <text x="140" y="93" text-anchor="middle" fill="#1e3a8a" font-size="11">train.cfg 전체를 보고</text>
+    <text x="140" y="109" text-anchor="middle" fill="#1e3a8a" font-size="11">Basis(A행렬) 구축</text>
+    <text x="140" y="128" text-anchor="middle" fill="#1e3a8a" font-size="11">→ A-state.als 저장</text>
+
+    <!-- A-state.als -->
+    <rect x="285" y="52" width="140" height="64" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+    <text x="355" y="76" text-anchor="middle" fill="#5b21b6" font-weight="700">A-state.als</text>
+    <text x="355" y="93" text-anchor="middle" fill="#5b21b6" font-size="10">Basis 행렬 A</text>
+    <text x="355" y="107" text-anchor="middle" fill="#5b21b6" font-size="10">+ A의 역행렬 A⁻¹</text>
+    <line x1="250" y1="84" x2="283" y2="84" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#afl)"/>
+
+    <!-- STEP B -->
+    <rect x="30" y="195" width="220" height="130" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="140" y="220" text-anchor="middle" font-weight="800" fill="#92400e" font-size="15">Step B</text>
+    <text x="140" y="238" text-anchor="middle" fill="#92400e" font-size="12">mlp relax</text>
+    <text x="140" y="258" text-anchor="middle" fill="#92400e" font-size="11">A-state.als 로드 후</text>
+    <text x="140" y="275" text-anchor="middle" fill="#92400e" font-size="11">relaxation 중 매 구조마다</text>
+    <text x="140" y="292" text-anchor="middle" fill="#ea580c" font-size="11" font-weight="700">γ 계산 → 3~10 사이면 저장</text>
+    <text x="140" y="310" text-anchor="middle" fill="#92400e" font-size="11">→ B-preselected.cfg</text>
+
+    <line x1="140" y1="140" x2="140" y2="193" stroke="#64748b" stroke-width="1.8" marker-end="url(#afl)"/>
+    <text x="152" y="170" fill="#64748b" font-size="10">als 파일 전달</text>
+
+    <!-- B-preselected -->
+    <rect x="285" y="222" width="140" height="78" rx="8" fill="#ffedd5" stroke="#ea580c" stroke-width="1.5"/>
+    <text x="355" y="248" text-anchor="middle" fill="#9a3412" font-weight="700">B-preselected.cfg</text>
+    <text x="355" y="265" text-anchor="middle" fill="#9a3412" font-size="10">3 &lt; γ ≤ 10인 구조들</text>
+    <text x="355" y="281" text-anchor="middle" fill="#9a3412" font-size="10">(DFT 계산 후보군)</text>
+    <line x1="250" y1="261" x2="283" y2="261" stroke="#ea580c" stroke-width="1.5" marker-end="url(#afl)"/>
+
+    <!-- STEP C -->
+    <rect x="30" y="385" width="220" height="75" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="140" y="408" text-anchor="middle" font-weight="800" fill="#166534" font-size="15">Step C</text>
+    <text x="140" y="426" text-anchor="middle" fill="#166534" font-size="12">mlp select-add</text>
+    <text x="140" y="444" text-anchor="middle" fill="#166534" font-size="11">MaxVol로 중복 제거</text>
+    <text x="140" y="458" text-anchor="middle" fill="#166534" font-size="11">→ C-selected.cfg</text>
+
+    <line x1="140" y1="325" x2="140" y2="383" stroke="#64748b" stroke-width="1.8" marker-end="url(#afl)"/>
+    <line x1="355" y1="300" x2="355" y2="360" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="5,3"/>
+    <line x1="355" y1="360" x2="255" y2="420" stroke="#ea580c" stroke-width="1.5" marker-end="url(#afl)"/>
+
+    <!-- C-selected -->
+    <rect x="285" y="392" width="140" height="60" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+    <text x="355" y="416" text-anchor="middle" fill="#166534" font-weight="700">C-selected.cfg</text>
+    <text x="355" y="434" text-anchor="middle" fill="#166534" font-size="10">가장 새로운 정보를</text>
+    <text x="355" y="448" text-anchor="middle" fill="#166534" font-size="10">가진 구조들</text>
+    <line x1="250" y1="420" x2="283" y2="420" stroke="#16a34a" stroke-width="1.5" marker-end="url(#afl)"/>
+
+    <!-- Step D, E on right -->
+    <rect x="470" y="30" width="290" height="78" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+    <text x="615" y="55" text-anchor="middle" font-weight="800" fill="#475569" font-size="14">Step D: VASP DFT</text>
+    <text x="615" y="75" text-anchor="middle" fill="#475569" font-size="11">C-selected.cfg → POSCAR 변환 → DFT 계산</text>
+    <text x="615" y="92" text-anchor="middle" fill="#475569" font-size="11">→ D-computed.cfg (에너지/힘/응력 포함)</text>
+
+    <rect x="470" y="145" width="290" height="62" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+    <text x="615" y="168" text-anchor="middle" font-weight="800" fill="#475569" font-size="14">Step E: mlp train</text>
+    <text x="615" y="188" text-anchor="middle" fill="#475569" font-size="11">D-computed.cfg로 pot.mtp 재학습</text>
+    <text x="615" y="202" text-anchor="middle" fill="#475569" font-size="11">에너지·힘·응력 가중치 적용</text>
+
+    <!-- C-selected → Step D: 우측 외곽(x=780)으로 올라가 Step D 우측 진입 -->
+    <path d="M 425 420 L 780 420 L 780 69 L 760 69" stroke="#94a3b8" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#afl)"/>
+    <!-- Step D → Step E -->
+    <line x1="615" y1="108" x2="615" y2="143" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#afl)"/>
+
+    <!-- Loop arrow: Step E 하단 → 아래 → 좌측 외곽(x=15) 우회 → Step B 좌측 진입 -->
+    <path d="M 615 207 L 615 375 L 15 375 L 15 260 L 30 260" stroke="#2563eb" fill="none" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#aflg)"/>
+    <text x="315" y="368" text-anchor="middle" fill="#2563eb" font-size="11">다음 반복 (새 MTP로 재시작)</text>
+  </svg>
+  <figcaption>그림 5. MLIP Active Learning에서 MaxVol이 담당하는 흐름 (Step A → B → C)</figcaption>
+  </figure>
+
+  <div class="flow">
+    <div class="flow-item">
+      <div class="flow-num">A</div>
+      <div class="flow-body">
+        <h3>Basis 확립</h3>
+        <p>기존 train.cfg 전체를 보고 MaxVol로 가장 다양한 N개를 선발.<br>
+        이 N개 구조의 지문 행렬 A와 A⁻¹을 A-state.als에 저장.</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-num">B</div>
+      <div class="flow-body">
+        <h3>실시간 감시</h3>
+        <p>MTP로 구조를 relaxation 하면서, 매 step마다 현재 구조의 γ를 즉시 계산.<br>
+        γ &gt; 3이면 "새로운 환경 발견!" → B-preselected.cfg에 기록.</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-num">C</div>
+      <div class="flow-body">
+        <h3>최종 정선</h3>
+        <p>B-preselected.cfg 중에서도 서로 비슷한 것들은 제거.<br>
+        MaxVol로 "진짜 새로운 정보"만 남긴 것이 C-selected.cfg.</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-num">D</div>
+      <div class="flow-body">
+        <h3>DFT 계산</h3>
+        <p>C-selected.cfg의 구조들만 선택적으로 VASP DFT 계산.<br>
+        필요한 구조만 계산하므로 비용이 대폭 절감됩니다.</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-num">E</div>
+      <div class="flow-body">
+        <h3>포텐셜 갱신</h3>
+        <p>DFT 결과를 train.cfg에 추가 후 pot.mtp 재학습.<br>
+        → 더 정확한 포텐셜로 다음 반복 시작.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SUMMARY -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="chapter">
+  <div class="chapter-num">요약</div>
+  <h2>한 줄로 정리</h2>
+
+  <table>
+    <tr>
+      <th>개념</th>
+      <th>수학적 표현</th>
+      <th>직관적 의미</th>
+    </tr>
+    <tr>
+      <td><strong>Feature vector φ</strong></td>
+      <td>에너지 파라미터 gradient</td>
+      <td>구조의 "지문" — 비슷한 환경 = 비슷한 지문</td>
+    </tr>
+    <tr>
+      <td><strong>Basis 행렬 A</strong></td>
+      <td>선택된 N개 지문의 N×N 행렬</td>
+      <td>현재까지 학습한 "지식 창고"의 뼈대</td>
+    </tr>
+    <tr>
+      <td><strong>MaxVol</strong></td>
+      <td>|det(A)| 최대화</td>
+      <td>가장 다양한 N개 구조 선택 (부피 최대)</td>
+    </tr>
+    <tr>
+      <td><strong>Grade γ</strong></td>
+      <td>max|φ_new · A⁻¹|</td>
+      <td>새 구조가 얼마나 "낯선가"의 점수</td>
+    </tr>
+    <tr>
+      <td><strong>γ &lt; γ_select (3.0)</strong></td>
+      <td>이미 알고 있는 영역</td>
+      <td><span class="pill pill-green">안전 — 계속 진행</span></td>
+    </tr>
+    <tr>
+      <td><strong>γ_select &lt; γ ≤ γ_break</strong></td>
+      <td>외삽 영역 — 새 정보</td>
+      <td><span class="pill pill-orange">저장 — DFT 계산 후보</span></td>
+    </tr>
+    <tr>
+      <td><strong>γ &gt; γ_break (10.0)</strong></td>
+      <td>포텐셜 신뢰 불가</td>
+      <td><span class="pill pill-red">종료 — 즉시 재학습 필요</span></td>
+    </tr>
+    <tr>
+      <td><strong>Swap</strong></td>
+      <td>A의 한 행 교체</td>
+      <td>기여도 낮은 기존 구조 → 새 구조로 교체</td>
+    </tr>
+  </table>
+
+  <div class="hl hl-purple" style="margin-top:24px;">
+    <strong>MaxVol Active Learning의 핵심 가치</strong>
+    DFT 계산이 필요한 구조를 무작위로 선택하는 대신, "가장 정보량이 많은" 구조만 골라 계산합니다.
+    결과적으로 <strong>훨씬 적은 DFT 계산으로 동등하거나 더 좋은 포텐셜</strong>을 얻을 수 있습니다.
+  </div>
+</div>
+
+</div><!-- .page -->
+</body>
+</html>
